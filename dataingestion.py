@@ -11,24 +11,39 @@ spark = SparkSession.builder.master('local').appName('app').getOrCreate()
 spark.conf.set("fs.azure.account.key.equitystorageaccount.blob.core.windows.net", \
     "/6U8afbBOiSnfyZTTrr0DUs9vkIK+SDiqnnnyaN2BD3KBy+r9gcb8Voie6a5zJ4y2rNQYNKK2F7HYYf0DTjQWw==")
 
-filenamecsv = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/csv"
-filenamejson = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/json"
+filenamecsv1 = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/csv/2020-08-06/NYSE/part-00000-214fff0a-f408-466c-bb15-095cd8b648dc-c000.txt"
+filenamecsv2 = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/csv/2020-08-05/NYSE/part-00000-5e4ced0a-66e2-442a-b020-347d0df4df8f-c000.txt" 
+filenamejson1 = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/json/2020-08-05/NASDAQ/part-00000-c6c48831-3d45-4887-ba5f-82060885fc6c-c000.txt"
+filenamejson2 = "wasbs://equitycontainer@equitystorageaccount.blob.core.windows.net/json/2020-08-06/NASDAQ/part-00000-092ec1db-39ab-4079-9580-f7c7b516a283-c000.txt"
 
 # using csv_parser to process the source data 
-raw = spark.sparkContext.textFile(filenamecsv)
-parsed = raw.map(lambda line: parse_csv(line))
-data = spark.createDataFrame(parsed)
-data.show()
-data.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
+rawcsv1 = spark.sparkContext.textFile(filenamecsv1)
+parsedcsv1 = rawcsv1.map(lambda line: parse_csv(line))
+datacsv1 = spark.createDataFrame(parsedcsv1)
+datacsv1.show()
+datacsv1.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
+
+rawcsv2 = spark.sparkContext.textFile(filenamecsv2)
+parsedcsv2 = rawcsv2.map(lambda line: parse_csv(line))
+datacsv2 = spark.createDataFrame(parsedcsv2)
+datacsv2.show()
+datacsv2.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
 
 # using json_parser to parse the source data
-rawj = spark.sparkContext.textFile(filenamejson)
-parsedj = rawj.map(lambda line: parse_json(line))
-dataj = spark.createDataFrame(parsedj)
-dataj.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
+rawj1 = spark.sparkContext.textFile(filenamejson1)
+parsedj1 = rawj1.map(lambda line: parse_json(line))
+dataj1 = spark.createDataFrame(parsedj1)
+dataj1.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
 
-print(data.count())
-print(dataj.count())
+rawj2 = spark.sparkContext.textFile(filenamejson2)
+parsedj2 = rawj2.map(lambda line: parse_json(line))
+dataj2 = spark.createDataFrame(parsedj2)
+dataj2.write.partitionBy("partition").mode("overwrite").parquet("output_dir")
+
+print(datacsv1.count())
+print(datacsv2.count())
+print(dataj1.count())
+print(dataj2.count())
 
 # csv parser
 def parse_csv(line):
